@@ -2,13 +2,17 @@
 **/obj/
 **/dist/
 **/node_modules/
+
 .vs/
 *.user
 *.suo
+
 .DS_Store
 Thumbs.db
+
 .env
 .env.*
 !.env.example
+
 *.log
 npm-debug.log*
