@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Raventa.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0b31dd83acb000b2d21c51177c4ce52afb1eb877")]
 [assembly: System.Reflection.AssemblyProductAttribute("Raventa.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Raventa.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
