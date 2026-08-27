@@ -59,8 +59,29 @@ Generated files are excluded through `.gitignore`:
 - local environment files
 - logs
 
+
+## Collaboration
+
+RAVENTA is open to constructive collaboration around software engineering, health technology, HMS/security workflows and practical implementation.
+
+- Report bugs through GitHub Issues.
+- Propose features and improvements through Issues.
+- Submit focused Pull Requests.
+- Contribute tests, documentation, accessibility and security improvements.
+- Review architecture and usability.
+
+See [COLLABORATION.md](COLLABORATION.md), [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [SECURITY.md](SECURITY.md).
+
+## Roadmap
+
+See [ROADMAP.md](ROADMAP.md) for the distinction between the current foundation and remaining production-readiness work.
+
+## Continuous integration
+
+GitHub Actions now validates the backend build, frontend build and any .NET test projects that actually exist. No test suite is represented as passing unless it exists and runs successfully.
+
 ## Production status
 
-The repository is structurally working, but production readiness still requires the remaining application modules, automated CI, deployment configuration, authentication/authorization, durable production database configuration, observability and security hardening to be completed and verified.
+The repository is structurally working, but production readiness still requires the remaining application modules, authentication/authorization, durable production database configuration, observability, security hardening, deployment configuration and end-to-end verification to be completed and verified.
 
-This README deliberately distinguishes implemented functionality from planned production work.
+This README deliberately distinguishes implemented functionality from remaining production work.
