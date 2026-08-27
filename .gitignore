@@ -1,14 +1,11 @@
-# .NET
+# Build output
 **/bin/
 **/obj/
-
-# Node / Vite
-**/node_modules/
 **/dist/
+**/node_modules/
 
-# IDE
+# Visual Studio
 .vs/
-.vscode/
 *.user
 *.suo
 
@@ -16,11 +13,11 @@
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-npm-debug.log*
-
-# Local configuration / secrets
+# Local secrets
 .env
 .env.*
 !.env.example
+
+# Logs
+*.log
+npm-debug.log*

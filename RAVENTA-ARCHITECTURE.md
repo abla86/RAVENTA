@@ -1,4 +1,4 @@
-﻿# RAVENTA
+# RAVENTA
 
 ## HMS Control Center
 
