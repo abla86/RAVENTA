@@ -1,4 +1,4 @@
-﻿const API = "http://localhost:5000/api";
+const API = "http://localhost:5000/api";
 
 async function request(url, options = {}) {
     const response = await fetch(`${API}${url}`, {
