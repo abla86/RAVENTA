@@ -1,23 +1,14 @@
-# Build output
 **/bin/
 **/obj/
 **/dist/
 **/node_modules/
-
-# Visual Studio
 .vs/
 *.user
 *.suo
-
-# OS
 .DS_Store
 Thumbs.db
-
-# Local secrets
 .env
 .env.*
 !.env.example
-
-# Logs
 *.log
 npm-debug.log*
