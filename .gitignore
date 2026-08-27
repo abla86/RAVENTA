@@ -1,8 +1,8 @@
-# .NET
+# .NET build output
 **/bin/
 **/obj/
 
-# Node
+# Frontend
 **/node_modules/
 **/dist/
 
@@ -10,9 +10,6 @@
 .vs/
 *.user
 *.suo
-
-# IDE
-.vscode/
 
 # OS
 .DS_Store

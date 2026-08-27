@@ -1,59 +1,52 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom/client";
 import "./styles.css";
 
-const API = "http://localhost:5000/api";
+const API = import.meta.env.VITE_API_URL ?? "http://localhost:5000/api";
 
-const initialItems = [
-    {
-        id: "demo-1",
-        area: "HMS",
-        type: "Avvik",
-        title: "Eksempel på HMS-avvik",
-        severity: "Medium",
-        status: "Open"
-    },
-    {
-        id: "demo-2",
-        area: "Security",
-        type: "Sikkerhetshendelse",
-        title: "Eksempel på sikkerhetshendelse",
-        severity: "High",
-        status: "InProgress"
-    }
+const statusOptions = [
+    ["Åpen", "Åpen"],
+    ["Under arbeid", "Under arbeid"],
+    ["Til verifisering", "Til verifisering"],
+    ["Lukket", "Lukket"]
 ];
 
-const statuses = [
-    ["Open", "Åpen"],
-    ["InProgress", "Pågår"],
-    ["PendingVerification", "Til verifisering"],
-    ["Closed", "Lukket"]
-];
+const initialForm = {
+    domain: "hms",
+    title: "",
+    description: "",
+    severity: "Medium"
+};
 
-function App() {
-    const [items, setItems] = useState(initialItems);
-    const [area, setArea] = useState("Alle");
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-
-    const [form, setForm] = useState({
-        area: "HMS",
-        type: "Avvik",
-        title: "",
-        severity: "Medium"
+async function request(path, options = {}) {
+    const response = await fetch(`${API}${path}`, {
+        headers: { "Content-Type": "application/json", ...(options.headers ?? {}) },
+        ...options
     });
 
+    if (!response.ok) {
+        throw new Error(`API-feil ${response.status}`);
+    }
+
+    return response.status === 204 ? null : response.json();
+}
+
+function App() {
+    const [items, setItems] = useState([]);
+    const [domain, setDomain] = useState("alle");
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState("");
+    const [form, setForm] = useState(initialForm);
+
     async function loadItems() {
+        setLoading(true);
+        setError("");
+
         try {
-            setLoading(true);
-            const response = await fetch(`${API}/control`);
-
-            if (!response.ok) throw new Error();
-
-            setItems(await response.json());
-            setError("");
-        } catch {
-            setError("API ikke tilgjengelig – viser lokal visning.");
+            setItems(await request("/records"));
+        } catch (err) {
+            setError(err.message);
         } finally {
             setLoading(false);
         }
@@ -66,65 +59,66 @@ function App() {
     async function createItem(event) {
         event.preventDefault();
 
-        if (!form.title.trim()) return;
+        if (!form.title.trim()) {
+            setError("Tittel må fylles ut.");
+            return;
+        }
+
+        setSaving(true);
+        setError("");
 
         try {
-            const response = await fetch(`${API}/control`, {
+            await request("/records", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(form)
+                body: JSON.stringify({
+                    domain: form.domain,
+                    title: form.title.trim(),
+                    description: form.description.trim(),
+                    severity: form.severity,
+                    status: "Åpen"
+                })
             });
 
-            if (!response.ok) throw new Error();
-
-            const created = await response.json();
-            setItems(current => [created, ...current]);
-            setForm(current => ({ ...current, title: "" }));
-        } catch {
-            setItems(current => [
-                {
-                    ...form,
-                    id: crypto.randomUUID(),
-                    status: "Open"
-                },
-                ...current
-            ]);
-            setForm(current => ({ ...current, title: "" }));
+            setForm({ ...initialForm });
+            await loadItems();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setSaving(false);
         }
     }
 
     async function updateStatus(id, status) {
+        setError("");
+
         try {
-            const response = await fetch(`${API}/control/${id}/status`, {
+            await request(`/records/${id}/status`, {
                 method: "PATCH",
-                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ status })
             });
 
-            if (!response.ok) throw new Error();
-        } catch {
-            // Lokal fallback
+            setItems(current =>
+                current.map(item =>
+                    item.id === id ? { ...item, status } : item
+                )
+            );
+        } catch (err) {
+            setError(err.message);
         }
-
-        setItems(current =>
-            current.map(item =>
-                item.id === id ? { ...item, status } : item
-            )
-        );
     }
 
     const filtered = useMemo(() => {
-        if (area === "Alle") return items;
-        return items.filter(item => item.area === area);
-    }, [items, area]);
+        if (domain === "alle") return items;
+        return items.filter(item => item.domain === domain);
+    }, [items, domain]);
 
     const summary = {
         total: items.length,
-        open: items.filter(x => x.status === "Open").length,
-        progress: items.filter(x => x.status === "InProgress").length,
-        verification: items.filter(x => x.status === "PendingVerification").length,
-        closed: items.filter(x => x.status === "Closed").length,
-        critical: items.filter(x => x.severity === "Critical").length
+        open: items.filter(x => x.status === "Åpen").length,
+        progress: items.filter(x => x.status === "Under arbeid").length,
+        verification: items.filter(x => x.status === "Til verifisering").length,
+        closed: items.filter(x => x.status === "Lukket").length,
+        critical: items.filter(x => x.severity === "Kritisk" || x.severity === "Critical").length
     };
 
     return (
@@ -135,17 +129,18 @@ function App() {
                     <h1>Control Center</h1>
                     <p>HMS + Security i én samlet kontrollsløyfe</p>
                 </div>
-
                 <div className="status">
                     <span className="dot" />
-                    System
+                    SYSTEM ACTIVE
                 </div>
             </header>
+
+            {error && <div className="notice error">{error}</div>}
 
             <section className="kpis">
                 <Kpi label="Totalt" value={summary.total} />
                 <Kpi label="Åpne" value={summary.open} />
-                <Kpi label="Pågår" value={summary.progress} />
+                <Kpi label="Under arbeid" value={summary.progress} />
                 <Kpi label="Verifisering" value={summary.verification} />
                 <Kpi label="Lukket" value={summary.closed} />
                 <Kpi label="Kritiske" value={summary.critical} />
@@ -156,7 +151,7 @@ function App() {
                     <div className="panel-head">
                         <div>
                             <h2>Ny registrering</h2>
-                            <span>HMS eller Security</span>
+                            <span>Registrer HMS- eller Security-forhold</span>
                         </div>
                     </div>
 
@@ -164,34 +159,30 @@ function App() {
                         <label>
                             Område
                             <select
-                                value={form.area}
-                                onChange={e =>
-                                    setForm({ ...form, area: e.target.value })
-                                }
+                                value={form.domain}
+                                onChange={e => setForm({ ...form, domain: e.target.value })}
                             >
-                                <option>HMS</option>
-                                <option>Security</option>
+                                <option value="hms">HMS</option>
+                                <option value="security">Security</option>
                             </select>
-                        </label>
-
-                        <label>
-                            Type
-                            <input
-                                value={form.type}
-                                onChange={e =>
-                                    setForm({ ...form, type: e.target.value })
-                                }
-                            />
                         </label>
 
                         <label>
                             Tittel
                             <input
                                 value={form.title}
-                                onChange={e =>
-                                    setForm({ ...form, title: e.target.value })
-                                }
+                                onChange={e => setForm({ ...form, title: e.target.value })}
                                 placeholder="Hva skal registreres?"
+                            />
+                        </label>
+
+                        <label>
+                            Beskrivelse
+                            <textarea
+                                value={form.description}
+                                onChange={e => setForm({ ...form, description: e.target.value })}
+                                placeholder="Kort beskrivelse"
+                                rows="4"
                             />
                         </label>
 
@@ -199,18 +190,18 @@ function App() {
                             Alvorlighet
                             <select
                                 value={form.severity}
-                                onChange={e =>
-                                    setForm({ ...form, severity: e.target.value })
-                                }
+                                onChange={e => setForm({ ...form, severity: e.target.value })}
                             >
-                                <option>Low</option>
+                                <option>Lav</option>
                                 <option>Medium</option>
-                                <option>High</option>
-                                <option>Critical</option>
+                                <option>Høy</option>
+                                <option>Kritisk</option>
                             </select>
                         </label>
 
-                        <button type="submit">+ Registrer</button>
+                        <button type="submit" disabled={saving}>
+                            {saving ? "Lagrer..." : "+ Registrer"}
+                        </button>
                     </form>
                 </div>
 
@@ -218,99 +209,79 @@ function App() {
                     <div className="panel-head">
                         <div>
                             <h2>Kontrolloversikt</h2>
-                            <span>
-                                Registrering → risiko → tiltak → verifisering → lukking
-                            </span>
+                            <span>Registrering → risiko → tiltak → verifisering → lukking</span>
                         </div>
 
                         <div className="filters">
-                            {["Alle", "HMS", "Security"].map(value => (
+                            {[
+                                ["alle", "Alle"],
+                                ["hms", "HMS"],
+                                ["security", "Security"]
+                            ].map(([value, label]) => (
                                 <button
                                     key={value}
-                                    className={area === value ? "active" : ""}
-                                    onClick={() => setArea(value)}
+                                    className={domain === value ? "active" : ""}
+                                    onClick={() => setDomain(value)}
                                 >
-                                    {value}
+                                    {label}
                                 </button>
                             ))}
                         </div>
                     </div>
 
-                    {error && <div className="notice">{error}</div>}
-                    {loading && <div className="notice">Laster...</div>}
+                    {loading && <div className="notice">Laster registreringer...</div>}
+
+                    {!loading && !filtered.length && (
+                        <div className="empty">Ingen registreringer.</div>
+                    )}
 
                     <div className="records">
                         {filtered.map(item => (
                             <article className="record" key={item.id}>
                                 <div className="record-main">
                                     <div className="record-top">
-                                        <span className={`badge ${item.area.toLowerCase()}`}>
-                                            {item.area}
+                                        <span className={`badge ${item.domain}`}>
+                                            {item.domain === "hms" ? "HMS" : "Security"}
                                         </span>
-                                        <span>{item.type}</span>
+                                        <span>{item.severity}</span>
                                     </div>
 
                                     <strong>{item.title}</strong>
 
+                                    {item.description && <p>{item.description}</p>}
+
                                     <small>
-                                        Alvorlighet: {item.severity}
+                                        Opprettet {new Date(item.createdAtUtc).toLocaleString("nb-NO")}
                                     </small>
                                 </div>
 
                                 <select
                                     value={item.status}
-                                    onChange={e =>
-                                        updateStatus(item.id, e.target.value)
-                                    }
+                                    onChange={e => updateStatus(item.id, e.target.value)}
                                 >
-                                    {statuses.map(([value, label]) => (
-                                        <option key={value} value={value}>
-                                            {label}
-                                        </option>
+                                    {statusOptions.map(([value, label]) => (
+                                        <option key={value} value={value}>{label}</option>
                                     ))}
                                 </select>
                             </article>
                         ))}
-
-                        {!filtered.length && (
-                            <div className="empty">
-                                Ingen registreringer.
-                            </div>
-                        )}
                     </div>
                 </div>
             </section>
 
             <section className="modules">
                 <Module title="HMS" items={[
-                    "Avvik",
-                    "Hendelser",
-                    "Risiko",
-                    "Tiltak",
-                    "Inspeksjoner",
-                    "Undersøkelser",
-                    "Kompetanse",
-                    "Dokumentasjon",
-                    "Revisjon",
-                    "Analyse"
+                    "Avvik", "Hendelser", "Risiko", "Tiltak", "Inspeksjoner",
+                    "Undersøkelser", "Kompetanse", "Dokumentasjon", "Revisjon", "Analyse"
                 ]} />
 
                 <Module title="Security" items={[
-                    "Sikkerhetshendelser",
-                    "Trusler",
-                    "Sårbarheter",
-                    "Risiko",
-                    "Sikkerhetstiltak",
-                    "Evidens",
-                    "Vurderinger",
-                    "Compliance",
-                    "Audit trail"
+                    "Sikkerhetshendelser", "Trusler", "Sårbarheter", "Risiko",
+                    "Sikkerhetstiltak", "Evidens", "Vurderinger", "Compliance", "Audit trail"
                 ]} />
             </section>
 
-            <footer>
-                RAVENTA Control Center · HMS + Security
-            </footer>
+            <footer>RAVENTA Control Center · HMS + Security</footer>
         </main>
     );
 }
@@ -329,16 +300,12 @@ function Module({ title, items }) {
         <div className="module">
             <h2>{title}</h2>
             <div className="module-list">
-                {items.map(item => (
-                    <span key={item}>{item}</span>
-                ))}
+                {items.map(item => <span key={item}>{item}</span>)}
             </div>
         </div>
     );
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-    <React.StrictMode>
-        <App />
-    </React.StrictMode>
+    <App />
 );
