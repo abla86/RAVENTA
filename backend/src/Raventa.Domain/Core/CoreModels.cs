@@ -1,4 +1,4 @@
-﻿namespace Raventa.Domain.Core;
+namespace Raventa.Domain.Core;
 
 public enum RecordStatus
 {
