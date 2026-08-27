@@ -1,0 +1,44 @@
+﻿{
+  "name": "RAVENTA",
+  "product": "HMS and Security Platform",
+  "areas": [
+    {
+      "id": "control-center",
+      "name": "HMS Control Center",
+      "modules": [
+        "Risiko",
+        "Avvik",
+        "Hendelser",
+        "Undersøkelser",
+        "Tiltak / CAPA",
+        "Inspeksjoner",
+        "Verifikasjon",
+        "Lukking",
+        "Læring",
+        "Analytics"
+      ]
+    },
+    {
+      "id": "security-center",
+      "name": "Security Center",
+      "modules": [
+        "Security incidents",
+        "Sårbarheter",
+        "Security controls",
+        "Security deviations",
+        "Tiltak",
+        "Verifikasjon",
+        "Lukking",
+        "Security audit trail"
+      ]
+    }
+  ],
+  "sharedEngine": [
+    "Risk",
+    "Actions",
+    "Evidence",
+    "Verification",
+    "AuditTrail",
+    "Analytics"
+  ]
+}
