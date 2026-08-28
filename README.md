@@ -85,3 +85,7 @@ GitHub Actions now validates the backend build, frontend build and any .NET test
 The repository is structurally working, but production readiness still requires the remaining application modules, authentication/authorization, durable production database configuration, observability, security hardening, deployment configuration and end-to-end verification to be completed and verified.
 
 This README deliberately distinguishes implemented functionality from remaining production work.
+
+## Change-control audit
+
+See [docs/REPOSITORY-CHANGE-AUDIT-2026-08-28.md](docs/REPOSITORY-CHANGE-AUDIT-2026-08-28.md) for the repository change-control and traceability record.
