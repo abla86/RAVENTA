@@ -21,7 +21,7 @@ jobs:
       - name: Build API
         run: dotnet build backend/src/Raventa.Api/Raventa.Api.csproj --configuration Release --no-restore --nologo
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "20"
           cache: npm
