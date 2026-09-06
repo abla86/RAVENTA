@@ -32,15 +32,34 @@ app.MapGet("/api/records", async (AppDb db, string? domain) =>
         : await db.Records.Where(r => r.Domain == domain.ToLower()).OrderByDescending(r => r.CreatedAtUtc).ToListAsync());
 
 app.MapPost("/api/records", async (AppDb db, ControlRecord rec) => {
+    var domain = rec.Domain.Trim().ToLowerInvariant();
+    var allowedSeverities = new[] { "Lav", "Medium", "Høy", "Kritisk", "Critical" };
+    var allowedStatuses = new[] { "Åpen", "Under arbeid", "Verifisering", "Lukket" };
+
+    if (domain is not ("hms" or "security") ||
+        string.IsNullOrWhiteSpace(rec.Title) || rec.Title.Trim().Length > 200 ||
+        rec.Description.Trim().Length > 5000 ||
+        !allowedSeverities.Contains(rec.Severity) ||
+        !allowedStatuses.Contains(rec.Status))
+    {
+        return Results.BadRequest(new { message = "Invalid control record. Check domain, title, description, severity and status." });
+    }
+
     rec.Id = Guid.NewGuid();
     rec.CreatedAtUtc = DateTime.UtcNow;
-    rec.Domain = rec.Domain.ToLower();
+    rec.Domain = domain;
+    rec.Title = rec.Title.Trim();
+    rec.Description = rec.Description.Trim();
     db.Records.Add(rec);
     await db.SaveChangesAsync();
     return Results.Created($"/api/records/{rec.Id}", rec);
 });
 
 app.MapPatch("/api/records/{id}/status", async (AppDb db, Guid id, StatusDto dto) => {
+    var allowedStatuses = new[] { "Åpen", "Under arbeid", "Verifisering", "Lukket" };
+    if (!allowedStatuses.Contains(dto.Status))
+        return Results.BadRequest(new { message = "Invalid status." });
+
     var rec = await db.Records.FindAsync(id);
     if (rec == null) return Results.NotFound();
     rec.Status = dto.Status;
