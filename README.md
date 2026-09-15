@@ -1,96 +1,22 @@
-# RAVENTA
+# LEGACY — RAVENTA
 
-RAVENTA is a full-stack HMS and Security control platform.
+RAVENTA is a historical full-stack HMS/security control prototype. Its control-record workflow has been consolidated into the canonical HealthTech portfolio repository.
 
-## Current architecture
+## Canonical destination
 
-- React + Vite frontend
-- ASP.NET Core / .NET 8 API
-- SQLite persistence
-- Domain project for shared core models
-- GitHub repository with generated build output excluded
+→ **[abla86/healthtech-dashboard](https://github.com/abla86/healthtech-dashboard)**
 
-## Control Center
+The consolidated implementation lives under:
 
-The current frontend provides:
+- `backend/raventa_control.py` — FastAPI control-record API
+- `backend/main.py` — registers the control API alongside the device API
+- `backend/test_raventa_control.py` — API lifecycle and validation coverage
+- `tools/raventa-control-center/` — historical UI-derived module material
 
-- HMS / Security filtering
-- control registration
-- severity
-- lifecycle status
-- KPI summary
-- API-backed persistence
-- responsive presentation
+The canonical API exposes synthetic control records through `/controls`, including domain/status filtering and create/patch lifecycle operations.
 
-Lifecycle:
+## Consolidation boundary
 
-`Registrering → risiko → tiltak → verifisering → lukking`
+RAVENTA is no longer a separate portfolio flagship. Do not build duplicate functionality here. Future HMS/security-control work belongs in `healthtech-dashboard`.
 
-## Local development
-
-### Backend
-
-```powershell
-dotnet build backend/src/Raventa.Api/Raventa.Api.csproj
-dotnet run --project backend/src/Raventa.Api/Raventa.Api.csproj
-```
-
-The API listens on `http://localhost:5000`.
-
-### Frontend
-
-```powershell
-cd frontend
-npm install
-npm run build
-npm run dev
-```
-
-The frontend uses `VITE_API_URL` when supplied and otherwise uses the local API.
-
-## Repository hygiene
-
-Generated files are excluded through `.gitignore`:
-
-- `bin/`
-- `obj/`
-- `dist/`
-- `node_modules/`
-- local environment files
-- logs
-
-
-## Collaboration
-
-RAVENTA is open to constructive collaboration around software engineering, health technology, HMS/security workflows and practical implementation.
-
-- Report bugs through GitHub Issues.
-- Propose features and improvements through Issues.
-- Submit focused Pull Requests.
-- Contribute tests, documentation, accessibility and security improvements.
-- Review architecture and usability.
-
-See [COLLABORATION.md](COLLABORATION.md), [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [SECURITY.md](SECURITY.md).
-
-## Roadmap
-
-See [ROADMAP.md](ROADMAP.md) for the distinction between the current foundation and remaining production-readiness work.
-
-## Continuous integration
-
-GitHub Actions now validates the backend build, frontend build and any .NET test projects that actually exist. No test suite is represented as passing unless it exists and runs successfully.
-
-## Production status
-
-The repository is structurally working, but production readiness still requires the remaining application modules, authentication/authorization, durable production database configuration, observability, security hardening, deployment configuration and end-to-end verification to be completed and verified.
-
-This README deliberately distinguishes implemented functionality from remaining production work.
-
-## Change-control audit
-
-See [docs/REPOSITORY-CHANGE-AUDIT-2026-08-28.md](docs/REPOSITORY-CHANGE-AUDIT-2026-08-28.md) for the repository change-control and traceability record.
-
-
-## Quality and verification
-
-Documentation is intended to describe the implementation that is actually present. Automated tests, dependency/security controls and repository checks should be used where appropriate. Prototype, demonstration and production status are kept distinct; claims are not made beyond what the code and available evidence support.
+This repository remains as historical source material until repository-level archival/deletion is handled separately.
